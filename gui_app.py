@@ -1,7 +1,10 @@
 import tkinter as tk
 from tkinter import messagebox, simpledialog
 from datetime import date
+from openpyxl import Workbook
+from tkinter import filedialog
 import os
+
 
 STUDENT_FILE = "students.txt"
 ATTENDANCE_FILE = "attendance.txt"
@@ -68,6 +71,33 @@ def view_attendance():
     msg = "\n".join([f"{d}: {len(ids)} students present" for d, ids in attendance_record.items()])
     messagebox.showinfo("Attendance Records", msg)
 
+def export_attendance_to_excel():
+    if not attendance_record:
+        messagebox.showinfo("Export", "No attendance data to export.")
+        return
+
+    file_path = filedialog.asksaveasfilename(defaultextension=".xlsx", filetypes=[("Excel files", "*.xlsx")])
+    if not file_path:
+        return
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Attendance Report"
+
+    # Header Row
+    ws.append(["Date"] + [s["name"] for s in students])
+
+    # Attendance Rows
+    for date_str, present_ids in attendance_record.items():
+        row = [date_str]
+        for s in students:
+            row.append("Present" if s["id"] in present_ids else "Absent")
+        ws.append(row)
+
+    wb.save(file_path)
+    messagebox.showinfo("Export Successful", f"Attendance exported to:\n{file_path}")
+
+
 # GUI Window
 def main_gui():
     load_data()
@@ -79,6 +109,7 @@ def main_gui():
     tk.Button(win, text="View Students", command=view_students, width=20).pack(pady=5)
     tk.Button(win, text="Mark Attendance", command=mark_attendance, width=20).pack(pady=5)
     tk.Button(win, text="View Attendance", command=view_attendance, width=20).pack(pady=5)
+    tk.Button(win, text="Export to Excel", command=export_attendance_to_excel, width=20).pack(pady=5)
     tk.Button(win, text="Exit", command=win.destroy, width=20).pack(pady=20)
 
     win.mainloop()
