@@ -1,60 +1,91 @@
-# app.py - Milestone 2: Add/View Students + Attendance
+# app.py - Milestone 3: Persistent storage
 
+import os
 from datetime import date
 
+STUDENT_FILE = "students.txt"
+ATTENDANCE_FILE = "attendance.txt"
+
 students = []
-attendance_record = {}  # Key: date, Value: list of present student IDs
+attendance_record = {}
+
+# Load data from files
+def load_data():
+    if os.path.exists(STUDENT_FILE):
+        with open(STUDENT_FILE, "r") as f:
+            for line in f:
+                name, sid = line.strip().split(",")
+                students.append({"name": name, "id": sid})
+
+    if os.path.exists(ATTENDANCE_FILE):
+        with open(ATTENDANCE_FILE, "r") as f:
+            for line in f:
+                line = line.strip()
+                if line:
+                    date_str, ids = line.split(":")
+                    attendance_record[date_str] = ids.split(",")
+
+# Save student list to file
+def save_students():
+    with open(STUDENT_FILE, "w") as f:
+        for s in students:
+            f.write(f"{s['name']},{s['id']}\n")
+
+# Save attendance record to file
+def save_attendance():
+    with open(ATTENDANCE_FILE, "w") as f:
+        for d, ids in attendance_record.items():
+            f.write(f"{d}:{','.join(ids)}\n")
 
 def add_student():
     name = input("Enter student name: ")
-    student_id = input("Enter student ID: ")
-    students.append({"name": name, "id": student_id})
-    print(f"Student {name} added successfully.\n")
+    sid = input("Enter student ID: ")
+    students.append({"name": name, "id": sid})
+    save_students()
+    print(f"Student {name} added.\n")
 
 def view_students():
     if not students:
-        print("No students added yet.\n")
+        print("No students.\n")
         return
-    print("\nList of Students:")
-    for idx, student in enumerate(students, start=1):
-        print(f"{idx}. {student['name']} (ID: {student['id']})")
+    for idx, s in enumerate(students, start=1):
+        print(f"{idx}. {s['name']} (ID: {s['id']})")
     print()
 
 def mark_attendance():
     if not students:
-        print("No students to mark attendance.\n")
+        print("No students found.\n")
         return
-
     today = str(date.today())
     present_ids = []
 
-    print(f"\nMarking attendance for {today}")
-    for student in students:
-        status = input(f"Is {student['name']} (ID: {student['id']}) present? (y/n): ").strip().lower()
+    print(f"Marking attendance for {today}:")
+    for s in students:
+        status = input(f"{s['name']} (ID: {s['id']}) present? (y/n): ").strip().lower()
         if status == 'y':
-            present_ids.append(student['id'])
+            present_ids.append(s['id'])
 
     attendance_record[today] = present_ids
-    print("\nAttendance recorded.\n")
+    save_attendance()
+    print("Attendance saved.\n")
 
 def view_attendance():
     if not attendance_record:
-        print("No attendance records found.\n")
+        print("No attendance records.\n")
         return
-
-    print("\nAttendance Records:")
-    for record_date, present_ids in attendance_record.items():
-        print(f"{record_date}: {len(present_ids)} present")
+    for d, ids in attendance_record.items():
+        print(f"{d}: {len(ids)} students present")
     print()
 
 def main():
+    load_data()
     while True:
-        print("1. Add Student")
+        print("\n1. Add Student")
         print("2. View Students")
         print("3. Mark Attendance")
-        print("4. View Attendance Records")
+        print("4. View Attendance")
         print("5. Exit")
-        choice = input("Choose an option: ")
+        choice = input("Choose option: ")
 
         if choice == '1':
             add_student()
@@ -67,7 +98,7 @@ def main():
         elif choice == '5':
             break
         else:
-            print("Invalid choice. Try again.\n")
+            print("Invalid choice.\n")
 
 if __name__ == "__main__":
     main()
