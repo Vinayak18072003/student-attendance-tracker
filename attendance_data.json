@@ -1,0 +1,10 @@
+@app.route('/dashboard')
+def dashboard():
+    data = {}
+    try:
+        with open("attendance_data.json", "r") as f:
+            if os.path.getsize("attendance_data.json") > 0:
+                data = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        data = {}
+    return render_template("dashboard.html", data=data)

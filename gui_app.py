@@ -86,6 +86,16 @@ def mark_attendance():
     save_attendance()
     messagebox.showinfo("Saved", f"Attendance for {today} saved!")
 
+import json
+
+def save_attendance_json():
+    with open("attendance_data.json", "w") as f:
+        json.dump(attendance_record, f, indent=4)
+
+# Call this after recording attendance
+save_attendance_json()
+
+
 def view_attendance():
     if not attendance_record:
         messagebox.showinfo("Attendance", "No records found.")

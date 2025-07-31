@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Attendance Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ccc; padding: 10px; text-align: center; }
+        th { background-color: #f4f4f4; }
+    </style>
+</head>
+<body>
+    <h2>Student Attendance Dashboard</h2>
+    {% if attendance %}
+    <table>
+        <tr>
+            <th>Date</th>
+            {% for student in attendance.values()|first %}
+                <th>{{ student }}</th>
+            {% endfor %}
+        </tr>
+        {% for date, record in attendance.items() %}
+        <tr>
+            <td>{{ date }}</td>
+            {% for student_id in attendance.values()|first %}
+                <td>{{ "Present" if student_id in record else "Absent" }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p>No attendance data available.</p>
+    {% endif %}
+</body>
+</html>
